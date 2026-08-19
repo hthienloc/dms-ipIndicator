@@ -23,6 +23,7 @@ PluginComponent {
     property string statusMessage: "..."
     // Settings
     property bool privacyMode: (pluginData.privacyDefault || false)
+    property bool pillShowLocal: (pluginData.pillShowLocal || false)
     property bool autoRefresh: (pluginData.autoRefresh ?? true)
     readonly property bool showHints: (pluginData.showHints ?? true)
     readonly property bool showIPv4: (pluginData.showIPv4 ?? true)
@@ -104,6 +105,9 @@ PluginComponent {
 
         if (vpnActive)
             return Theme.success;
+
+        if (pillShowLocal)
+            return (localIP && localIP !== "N/A") ? Theme.primary : Theme.surfaceText;
 
         if (root.publicIP)
             return Theme.primary;
@@ -289,12 +293,23 @@ PluginComponent {
         privacyMode = !privacyMode;
     }
 
+    function setPillSource(showLocal) {
+        if (pillShowLocal === showLocal)
+            return;
+
+        pillShowLocal = showLocal;
+        pluginService.savePluginData("ipIndicator", "pillShowLocal", showLocal);
+    }
+
     function getDisplayText() {
         if (root.displayMode === "icon")
             return "";
 
         if (privacyMode)
             return "";
+
+        if (pillShowLocal)
+            return localIP || "N/A";
 
         if (isFetching)
             return "...";
@@ -500,18 +515,18 @@ PluginComponent {
                     height: 14
                     fillMode: Image.PreserveAspectFit
                     anchors.verticalCenter: parent.verticalCenter
-                    visible: root.useFlagIcon && !privacyMode && root.countryCode !== ""
+                    visible: root.useFlagIcon && !privacyMode && !pillShowLocal && root.countryCode !== ""
                     smooth: true
                     asynchronous: true
                     cache: true
                 }
 
                 DankIcon {
-                    name: privacyMode ? "visibility_off" : (vpnActive ? "vpn_key" : "public")
+                    name: privacyMode ? "visibility_off" : (pillShowLocal ? "lan" : (vpnActive ? "vpn_key" : "public"))
                     size: Theme.iconSizeSmall
                     color: root.pillColor
                     anchors.verticalCenter: parent.verticalCenter
-                    visible: !root.useFlagIcon || privacyMode || root.countryCode === ""
+                    visible: !root.useFlagIcon || privacyMode || pillShowLocal || root.countryCode === ""
                 }
 
                 StyledText {
@@ -554,18 +569,18 @@ PluginComponent {
                     height: 14
                     fillMode: Image.PreserveAspectFit
                     anchors.horizontalCenter: parent.horizontalCenter
-                    visible: root.useFlagIcon && !privacyMode && root.countryCode !== ""
+                    visible: root.useFlagIcon && !privacyMode && !pillShowLocal && root.countryCode !== ""
                     smooth: true
                     asynchronous: true
                     cache: true
                 }
 
                 DankIcon {
-                    name: privacyMode ? "visibility_off" : (vpnActive ? "vpn_key" : "public")
+                    name: privacyMode ? "visibility_off" : (pillShowLocal ? "lan" : (vpnActive ? "vpn_key" : "public"))
                     size: Theme.iconSizeSmall
                     color: root.pillColor
                     anchors.horizontalCenter: parent.horizontalCenter
-                    visible: !root.useFlagIcon || privacyMode || root.countryCode === ""
+                    visible: !root.useFlagIcon || privacyMode || pillShowLocal || root.countryCode === ""
                 }
 
                 StyledText {
@@ -1002,6 +1017,32 @@ PluginComponent {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: togglePrivacy()
+                            }
+
+                        }
+
+                        // Bar Display Source Button
+                        Rectangle {
+                            width: 32
+                            height: 32
+                            radius: 16
+                            color: sourceArea.containsMouse ? Theme.surfaceContainerHigh : "transparent"
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            DankIcon {
+                                anchors.centerIn: parent
+                                name: pillShowLocal ? "lan" : "public"
+                                size: Theme.iconSizeSmall
+                                color: Theme.surfaceText
+                            }
+
+                            MouseArea {
+                                id: sourceArea
+
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.setPillSource(!pillShowLocal)
                             }
 
                         }
