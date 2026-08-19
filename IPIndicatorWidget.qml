@@ -532,7 +532,7 @@ PluginComponent {
                 StyledText {
                     text: root.getDisplayText()
                     color: root.pillColor
-                    font.pixelSize: Theme.fontSizeMedium
+                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
                     anchors.verticalCenter: parent.verticalCenter
                     visible: root.displayMode !== "icon" && root.getDisplayText() !== ""
                 }
@@ -586,7 +586,7 @@ PluginComponent {
                 StyledText {
                     text: root.getDisplayText()
                     color: root.pillColor
-                    font.pixelSize: Theme.fontSizeSmall
+                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
                     anchors.horizontalCenter: parent.horizontalCenter
                     visible: root.displayMode !== "icon" && root.getDisplayText() !== ""
                 }
